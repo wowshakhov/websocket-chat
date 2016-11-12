@@ -1,0 +1,62 @@
+ html, body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	overflow: hidden;
+}
+
+.new_message {
+	background-color: white;
+}
+
+.current_chat {
+	background-color: teal;
+}
+
+textarea {
+	resize: none;
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	padding: 0;
+	margin: 0;
+	border: none;
+	outline: none;
+	box-shadow: none;
+	padding: 2px;
+}
+
+
+#wrapper {
+	height: 100%;
+	display: flex;
+}
+
+#contact-list {
+	flex: 1;
+	align-content: row;
+	background-color: #ff0000;
+	overflow: auto;
+}
+
+#wrapper-right {
+	display: flex;
+	flex: 3 ;
+	flex-direction: column;
+	background-color: #000000;
+}
+
+#text-log {
+	flex: 7;
+	white-space: pre;
+	background-color: #00ff00;
+	overflow-y: auto;
+	padding-bottom: 20%;
+}
+
+#input-area {
+	display: none;
+	flex: 1 ;
+	padding: 2px;
+	background-color: #ffffff;
+}
