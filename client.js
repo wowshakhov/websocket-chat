@@ -53,14 +53,13 @@
 	//test
 	//let WebSocket_ = require('ws');
 	var nickname = '';
+	var address = '';
 	var connection_status = 'disconnected';
 	var current_chat = '';
 	var ws = null;
 	var contacts = {};
-	while (!(nickname = prompt("Username: ", "vasyan"))) {
-	    nickname = prompt("Please enter a valid username below:", "");
-	}
-	var address = prompt("Server address:", 'localhost');
+	nickname = prompt("Username: ", "vasyan");
+	address = prompt("Server address:", 'localhost');
 	wsinit(nickname, address);
 	// rl.question('server address: ', (answer) => {
 	// 	let address = answer;
@@ -78,30 +77,44 @@
 	        }));
 	    };
 	    ws.onerror = function (event) {
-	        alert("Disconnected.");
+	        address = prompt("Couldn't reach server. Try another one:", 'localhost');
+	        wsinit(nickname, address);
 	    };
 	    ws.onmessage = function (event) {
 	        var message = JSON.parse(event.data);
 	        switch (message.op) {
 	            case 'connection_status':
-	                if (message.status == 'connected') {
-	                    connection_status = 'connected';
+	                switch (message.status) {
+	                    case 'connected':
+	                        connection_status = 'connected';
+	                        break;
+	                    case 'name_already_taken':
+	                        nickname = prompt("Name already taken. Try another one:", "");
+	                        wsinit(nickname, address);
+	                        break;
+	                    case 'invalid_name':
+	                        nickname = prompt("Invalid name. Try another one:", "");
+	                        wsinit(nickname, address);
+	                        break;
 	                }
-	                //test
 	                break;
 	            case 'message':
+	                if (connection_status == 'disconnected') {
+	                    break;
+	                }
 	                console.log(message.from + ": " + message.msg);
-	                contacts[message.from].log.push(message.from + ": " + message.msg);
+	                contacts[message.from].log.push({
+	                    sender: message.from,
+	                    message: message.msg
+	                });
 	                if (message.from != current_chat) {
 	                    var contact = document.getElementById(message.from);
 	                    contact.classList.add('new_message');
 	                    break;
 	                }
+	                //func
 	                var textlog = document.getElementById("text-log");
-	                var msgdiv = document.createElement("div");
-	                var text = document.createTextNode(message.from + ': ' + message.msg);
-	                msgdiv.appendChild(text);
-	                textlog.appendChild(msgdiv);
+	                appendMessage(message.from, message.msg, textlog);
 	                textlog.scrollTop = textlog.scrollHeight;
 	                break;
 	            case 'update':
@@ -134,6 +147,7 @@
 	                    var n = document.createTextNode(elem);
 	                    d1.appendChild(n);
 	                    d1.id = elem;
+	                    d1.classList.add('contact');
 	                    if (oldcontact && oldcontact.classList.contains('current_chat')) {
 	                        d1.classList.add('current_chat');
 	                    }
@@ -188,14 +202,26 @@
 	    var d = document.createElement("div");
 	    d.id = "text-log";
 	    contacts[id].log.forEach(function (elem) {
-	        var d1 = document.createElement("div");
-	        var n = document.createTextNode(elem);
-	        d1.appendChild(n);
-	        d.appendChild(d1);
+	        appendMessage(elem.sender, elem.message, d);
 	    });
 	    d.scrollTop = d.scrollHeight;
 	    var old = document.getElementById("text-log");
 	    old.parentNode.replaceChild(d, old);
+	}
+	function appendMessage(from, msg, textlog) {
+	    var message_container = document.createElement("div");
+	    message_container.classList.add('message_container');
+	    var message_ = document.createElement("div");
+	    message_.classList.add('message');
+	    var sender = document.createElement("div");
+	    sender.classList.add('sender');
+	    var message_text = document.createTextNode(msg);
+	    var sender_text = document.createTextNode(from + '> ');
+	    sender.appendChild(sender_text);
+	    message_.appendChild(message_text);
+	    message_container.appendChild(sender);
+	    message_container.appendChild(message_);
+	    textlog.appendChild(message_container);
 	}
 	function sendmessage(msg, to) {
 	    if (connection_status != 'connected') {
@@ -207,12 +233,12 @@
 	        to: to,
 	        msg: msg
 	    }));
-	    contacts[to].log.push('Me: ' + msg);
+	    contacts[to].log.push({
+	        sender: 'Me',
+	        message: msg
+	    });
 	    var textlog = document.getElementById("text-log");
-	    var message = document.createElement("div");
-	    var text = document.createTextNode('Me: ' + msg);
-	    message.appendChild(text);
-	    textlog.appendChild(message);
+	    appendMessage('Me', msg, textlog);
 	    textlog.scrollTop = textlog.scrollHeight;
 	    //	let d = document.createElement("div");
 	    //	d.id = "text-log";
@@ -241,9 +267,6 @@
 	// 	}
 	// });
 	document.addEventListener("DOMContentLoaded", function (event) {
-	    document.getElementById("text-log").addEventListener('click', function () {
-	        sendmessage('privet', 'vasyan');
-	    });
 	    var ta = document.querySelector('#textarea');
 	    ta.addEventListener('keydown', function (e) {
 	        textAreaInputHandler(e, ta);
