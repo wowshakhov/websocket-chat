@@ -44,14 +44,6 @@
 /* 0 */
 /***/ function(module, exports) {
 
-	//test
-	// const readline = require('readline');
-	// const rl = readline.createInterface({
-	// 	input: process.stdin,
-	// 	output: process.stdout
-	// });
-	//test
-	//let WebSocket_ = require('ws');
 	var nickname = '';
 	var address = '';
 	var connection_status = 'disconnected';
@@ -61,13 +53,6 @@
 	nickname = prompt("Username: ", "vasyan");
 	address = prompt("Server address:", 'localhost');
 	wsinit(nickname, address);
-	// rl.question('server address: ', (answer) => {
-	// 	let address = answer;
-	// 	rl.question('username: ', (answer) => {
-	// 		let username = answer;
-	// 		wsinit(address, username);
-	// 	});
-	// });
 	function wsinit(username, address) {
 	    ws = new WebSocket('ws://' + address + ':8080/');
 	    ws.onopen = function (event) {
@@ -78,7 +63,9 @@
 	    };
 	    ws.onerror = function (event) {
 	        address = prompt("Couldn't reach server. Try another one:", 'localhost');
-	        wsinit(nickname, address);
+	        if (address) {
+	            wsinit(nickname, address);
+	        }
 	    };
 	    ws.onmessage = function (event) {
 	        var message = JSON.parse(event.data);
@@ -90,11 +77,15 @@
 	                        break;
 	                    case 'name_already_taken':
 	                        nickname = prompt("Name already taken. Try another one:", "");
-	                        wsinit(nickname, address);
+	                        if (nickname) {
+	                            wsinit(nickname, address);
+	                        }
 	                        break;
 	                    case 'invalid_name':
 	                        nickname = prompt("Invalid name. Try another one:", "");
-	                        wsinit(nickname, address);
+	                        if (nickname) {
+	                            wsinit(nickname, address);
+	                        }
 	                        break;
 	                }
 	                break;
@@ -109,16 +100,15 @@
 	                });
 	                if (message.from != current_chat) {
 	                    var contact = document.getElementById(message.from);
-	                    contact.classList.add('new_message');
+	                    contact.classList.add('new-message');
 	                    break;
 	                }
-	                //func
 	                var textlog = document.getElementById("text-log");
 	                appendMessage(message.from, message.msg, textlog);
 	                textlog.scrollTop = textlog.scrollHeight;
 	                break;
 	            case 'update':
-	                var closeCurrentChatFlag_1 = true;
+	                var closeCurrentChatFlag_1 = current_chat != '';
 	                var contacts_array = message.contact_list.split(":");
 	                var new_contacts_1 = {};
 	                contacts_array.forEach(function (elem) {
@@ -151,8 +141,8 @@
 	                    if (oldcontact && oldcontact.classList.contains('current_chat')) {
 	                        d1.classList.add('current_chat');
 	                    }
-	                    if (oldcontact && oldcontact.classList.contains('new_message')) {
-	                        d1.classList.add('new_message');
+	                    if (oldcontact && oldcontact.classList.contains('new-message')) {
+	                        d1.classList.add('new-message');
 	                    }
 	                    d1.addEventListener('click', function () {
 	                        changeCurrentChat(d1.id);
@@ -177,10 +167,6 @@
 	function closeCurrentChat() {
 	    var ia = document.getElementById('input-area');
 	    ia.style.display = 'none';
-	    //	let previous_chat = document.getElementsByClassName('current_chat')[0];
-	    //	if (previous_chat) {
-	    //		previous_chat.classList.remove('current_chat');
-	    //	}
 	    var d = document.createElement("div");
 	    d.id = "text-log";
 	    var old = document.getElementById("text-log");
@@ -189,15 +175,13 @@
 	function changeCurrentChat(id) {
 	    var ia = document.getElementById('input-area');
 	    ia.style.display = 'initial';
-	    //	let ta = document.getElementById('textarea');
-	    //	ta.style.display = 'initial';
 	    var previous_chat = document.getElementsByClassName('current_chat')[0];
 	    if (previous_chat) {
 	        previous_chat.classList.remove('current_chat');
 	    }
 	    var contact = document.getElementById(id);
 	    contact.classList.add('current_chat');
-	    contact.classList.remove('new_message');
+	    contact.classList.remove('new-message');
 	    current_chat = id;
 	    var d = document.createElement("div");
 	    d.id = "text-log";
@@ -216,7 +200,7 @@
 	    var sender = document.createElement("div");
 	    sender.classList.add('sender');
 	    var message_text = document.createTextNode(msg);
-	    var sender_text = document.createTextNode(from + '> ');
+	    var sender_text = document.createTextNode(from + '\u00A0>'); // u00A0 = &nbsp;
 	    sender.appendChild(sender_text);
 	    message_.appendChild(message_text);
 	    message_container.appendChild(sender);
@@ -240,32 +224,7 @@
 	    var textlog = document.getElementById("text-log");
 	    appendMessage('Me', msg, textlog);
 	    textlog.scrollTop = textlog.scrollHeight;
-	    //	let d = document.createElement("div");
-	    //	d.id = "text-log";
-	    //	for (let elem in contacts[to].log) {
-	    //		let d1 = document.createElement("div");
-	    //		let n = document.createTextNode(elem);
-	    //		d1.appendChild(n);
-	    //		d1.id = elem;
-	    //		d.appendChild(d1);
-	    //	};
-	    //	let old = document.getElementById("text-log");
-	    //	old.parentNode.replaceChild(d, old);
 	}
-	//test
-	// rl.on('line', (input) => {
-	// 	let command = input.split(' ');
-	// 	switch (command[0]) {
-	// 		case 'send':
-	// 			ws.send(JSON.stringify({
-	// 				op: command[0],
-	// 				from: command[1],
-	// 				to: command[2],
-	// 				msg: command[3]
-	// 			}));
-	// 			break;
-	// 	}
-	// });
 	document.addEventListener("DOMContentLoaded", function (event) {
 	    var ta = document.querySelector('#textarea');
 	    ta.addEventListener('keydown', function (e) {

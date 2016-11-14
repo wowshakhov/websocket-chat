@@ -1,12 +1,3 @@
-//test
-// const readline = require('readline');
-// const rl = readline.createInterface({
-// 	input: process.stdin,
-// 	output: process.stdout
-// });
-//test
-//let WebSocket_ = require('ws');
-
 let nickname = '';
 let address = '';
 let connection_status = 'disconnected';
@@ -18,15 +9,6 @@ nickname = prompt("Username: ", "vasyan");
 address = prompt("Server address:", 'localhost');
 wsinit(nickname, address);
 
-// rl.question('server address: ', (answer) => {
-// 	let address = answer;
-// 	rl.question('username: ', (answer) => {
-// 		let username = answer;
-// 		wsinit(address, username);
-// 	});
-// });
-
-
 function wsinit(username, address) {
 	ws = new WebSocket('ws://' + address + ':8080/');
 	ws.onopen = function (event) {
@@ -37,7 +19,9 @@ function wsinit(username, address) {
 	};
 	ws.onerror = function (event) {
 		address = prompt("Couldn't reach server. Try another one:", 'localhost');
-		wsinit(nickname, address);
+		if (address) {
+			wsinit(nickname, address);
+		}
 	};
 	ws.onmessage = function (event) {
 		let message = JSON.parse(event.data);
@@ -49,11 +33,15 @@ function wsinit(username, address) {
 					break;
 					case 'name_already_taken':
 						nickname = prompt("Name already taken. Try another one:", "");
-						wsinit(nickname, address);
+						if (nickname) {
+							wsinit(nickname, address);
+						}
 					break;
 					case 'invalid_name':
 						nickname = prompt("Invalid name. Try another one:", "");
-						wsinit(nickname, address);
+						if (nickname) {
+							wsinit(nickname, address);
+						}
 					break;
 				}
 				break;
@@ -68,17 +56,15 @@ function wsinit(username, address) {
 				});
 				if (message.from != current_chat) {
 					let contact = document.getElementById(message.from);
-					contact.classList.add('new_message');
+					contact.classList.add('new-message');
 					break;
 				}
-
-				//func
 				let textlog = document.getElementById("text-log");
 				appendMessage(message.from, message.msg, textlog);
 				textlog.scrollTop = textlog.scrollHeight;
 				break;
 			case 'update':
-			let closeCurrentChatFlag = true;
+				let closeCurrentChatFlag = current_chat != '';
 				let contacts_array = message.contact_list.split(":");
 				let new_contacts = {};
 				contacts_array.forEach((elem) => {
@@ -108,14 +94,17 @@ function wsinit(username, address) {
 					d1.id = elem;
 					d1.classList.add('contact');
 
-					if (oldcontact && oldcontact.classList.contains('current_chat')) { d1.classList.add('current_chat'); }
-					if (oldcontact && oldcontact.classList.contains('new_message')) {d1.classList.add('new_message'); }
+					if (oldcontact && oldcontact.classList.contains('current_chat')) { 
+						d1.classList.add('current_chat'); 
+					}
+					if (oldcontact && oldcontact.classList.contains('new-message')) {
+						d1.classList.add('new-message'); 
+					}
 
 					d1.addEventListener('click', function() {
 						changeCurrentChat(d1.id);
 					});
 					d.appendChild(d1);
-//					d1.onclick
 				};
 				let old = document.getElementById("contact-list");
 				old.parentNode.replaceChild(d, old);
@@ -132,10 +121,6 @@ function wsinit(username, address) {
 function closeCurrentChat() {
 	let ia = document.getElementById('input-area');
 	ia.style.display = 'none';
-//	let previous_chat = document.getElementsByClassName('current_chat')[0];
-//	if (previous_chat) {
-//		previous_chat.classList.remove('current_chat');
-//	}
 	let d = document.createElement("div");
 	d.id = "text-log";
 	let old = document.getElementById("text-log");
@@ -146,16 +131,13 @@ function changeCurrentChat(id) {
 	let ia = document.getElementById('input-area');
 	ia.style.display = 'initial';
 
-//	let ta = document.getElementById('textarea');
-//	ta.style.display = 'initial';
-
 	let previous_chat = document.getElementsByClassName('current_chat')[0];
 	if (previous_chat) {
 		previous_chat.classList.remove('current_chat');
 	}
 	let contact = document.getElementById(id);
 	contact.classList.add('current_chat');
-	contact.classList.remove('new_message');
+	contact.classList.remove('new-message');
 
 	current_chat = id;
 	let d = document.createElement("div");
@@ -176,7 +158,7 @@ function appendMessage(from, msg, textlog) {
 	let sender = document.createElement("div");
 	sender.classList.add('sender'); 
 	let message_text = document.createTextNode(msg);
-	let sender_text = document.createTextNode(from + '> '); 
+	let sender_text = document.createTextNode(from + '\u00A0>'); // u00A0 = &nbsp;
 	sender.appendChild(sender_text);
 	message_.appendChild(message_text);
 	message_container.appendChild(sender);
@@ -201,37 +183,7 @@ function sendmessage(msg, to) {
 	let textlog = document.getElementById("text-log");
 	appendMessage('Me', msg, textlog);
 	textlog.scrollTop = textlog.scrollHeight;
-//	let d = document.createElement("div");
-//	d.id = "text-log";
-//	for (let elem in contacts[to].log) {
-//		let d1 = document.createElement("div");
-//		let n = document.createTextNode(elem);
-//		d1.appendChild(n);
-//		d1.id = elem;
-//		d.appendChild(d1);
-//	};
-//	let old = document.getElementById("text-log");
-//	old.parentNode.replaceChild(d, old);
 }
-
-
-
-//test
-
-
-// rl.on('line', (input) => {
-// 	let command = input.split(' ');
-// 	switch (command[0]) {
-// 		case 'send':
-// 			ws.send(JSON.stringify({
-// 				op: command[0],
-// 				from: command[1],
-// 				to: command[2],
-// 				msg: command[3]
-// 			}));
-// 			break;
-// 	}
-// });
 
 document.addEventListener("DOMContentLoaded", function(event) { 
 	let ta = document.querySelector('#textarea');
