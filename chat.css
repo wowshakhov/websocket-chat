@@ -12,7 +12,7 @@ html, body {
 .new-message:after {
   content: " (new message)"; }
 
-.current_chat {
+.current-chat {
   background-color: #E0F7FA !important; }
 
 .sender {
@@ -28,7 +28,7 @@ html, body {
   word-break: break-all;
   word-wrap: break-word; }
 
-.message_container {
+.message-container {
   display: flex;
   padding: 5px;
   flex: 0 1 100%;
@@ -84,4 +84,3 @@ textarea {
   flex: 1;
   padding: 2px;
   background-color: #FFFFFF; }
-
