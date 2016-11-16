@@ -5,4 +5,4 @@
 ```
 git clone https://github.com/wowshakhov/websocket-chat.git
 ```
-Открыть chat.html
+Открыть ```chat.html```
