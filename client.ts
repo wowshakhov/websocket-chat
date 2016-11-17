@@ -312,7 +312,7 @@ ws.onmessage = (event) => {
             processMessage(message);
             break;
         case "update":
-            updateContactList(message.contact_list);
+            updateContactList(message.contactList);
             break;
         default: break;
     }
